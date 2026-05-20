@@ -5,7 +5,7 @@ Resources:
       Runtime: python3.11
       FunctionName: techno-lambda-init-db
       Role: arn:aws:iam::582450002492:role/LabRole
-      Handler: index.handler
+      Handler: lambda_function.lambda_handler
       Code:
         ZipFile: |
           def lambda_handler(event, context):
@@ -28,25 +28,12 @@ Resources:
           - subnet-0a2ba53ad21fc61e1
           - subnet-010210e102f6de793
 
-  InitDatabaseVersion:
-      Type: AWS::Lambda::Version
-      Properties:
-        FunctionName: !Ref InitDatabase
-        Description: v1
-
-  InitDatabaseAlias:
-      Type: AWS::Lambda::Alias
-      Properties:
-        FunctionName: !Ref InitDatabase
-        FunctionVersion: !GetAtt InitDatabaseVersion.Version
-        Name: live
-
   GenerateReport:
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.11
       Role: arn:aws:iam::582450002492:role/LabRole
-      Handler: index.handler
+      Handler: lambda_function.lambda_handler
       Environment:
         Variables:
           SECRET_ARN: changeme
@@ -69,26 +56,13 @@ Resources:
         SubnetIds:
           - subnet-0a2ba53ad21fc61e1
           - subnet-010210e102f6de793
-
-  GenerateReportVersion:
-      Type: AWS::Lambda::Version
-      Properties:
-        FunctionName: !Ref GenerateReport
-        Description: v1
-
-  GenerateReportAlias:
-      Type: AWS::Lambda::Alias
-      Properties:
-        FunctionName: !Ref GenerateReport
-        FunctionVersion: !GetAtt GenerateReportVersion.Version
-        Name: live
   
   SendNotication:
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.11
       Role: arn:aws:iam::582450002492:role/LabRole
-      Handler: index.handler
+      Handler: lambda_function.lambda_handler
       Environment:
         Variables:
           SECRET_ARN: changeme
@@ -111,26 +85,13 @@ Resources:
         SubnetIds:
           - subnet-0a2ba53ad21fc61e1
           - subnet-010210e102f6de793
-
-  SendNoticationVersion:
-      Type: AWS::Lambda::Version
-      Properties:
-        FunctionName: !Ref SendNotication
-        Description: v1
-
-  SendNoticationAlias:
-      Type: AWS::Lambda::Alias
-      Properties:
-        FunctionName: !Ref SendNotication
-        FunctionVersion: !GetAtt SendNoticationVersion.Version
-        Name: live
   
   UpdateInventory:
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.11
       Role: arn:aws:iam::582450002492:role/LabRole
-      Handler: index.handler
+      Handler: lambda_function.lambda_handler
       Environment:
         Variables:
           SECRET_ARN: changeme
@@ -154,26 +115,12 @@ Resources:
           - subnet-0a2ba53ad21fc61e1
           - subnet-010210e102f6de793
 
-  UpdateInventoryVersion:
-      Type: AWS::Lambda::Version
-      Properties:
-        FunctionName: !Ref UpdateInventory
-        Description: v1
-      
-
-  UpdateInventoryAlias:
-      Type: AWS::Lambda::Alias
-      Properties:
-        FunctionName: !Ref UpdateInventory
-        FunctionVersion: !GetAtt UpdateInventoryVersion.Version
-        Name: live
-
   ProcessPayment:
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.11
       Role: arn:aws:iam::582450002492:role/LabRole
-      Handler: index.handler
+      Handler: lambda_function.lambda_handler
       Environment:
         Variables:
           SECRET_ARN: changeme
@@ -196,17 +143,33 @@ Resources:
         SubnetIds:
           - subnet-0a2ba53ad21fc61e1
           - subnet-010210e102f6de793
-
-  ProcessPaymentVersion:
-      Type: AWS::Lambda::Version
-      Properties:
-        FunctionName: !Ref ProcessPayment
-        Description: v1
-
-  ProcessPaymentAlias:
-      Type: AWS::Lambda::Alias
-      Properties:
-        FunctionName: !Ref ProcessPayment
-        FunctionVersion: !GetAtt ProcessPaymentVersion.Version
-        Name: live
+  
+  HealthCheck:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.11
+      Role: arn:aws:iam::582450002492:role/LabRole
+      Handler: lambda_function.lambda_handler
+      Environment:
+        Variables:
+          SECRET_ARN: changeme
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+            return {}
+      Description: Health Check
+      TracingConfig:
+        Mode: Active
+      Timeout: 10
+      MemorySize: 128
+      FunctionName: techno-lambda-health-check
+      Tags:
+        - Key: Name
+          Value: techno-lambda-health-check
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-07358962d18c8bf54
+        SubnetIds:
+          - subnet-0a2ba53ad21fc61e1
+          - subnet-010210e102f6de793
   
