@@ -1,0 +1,54 @@
+Resources:
+  OrdersBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: Private
+      BucketName: techno-orders-raihan-2026
+      # IntelligentTieringConfigurations:
+      #   - Id: techno-intelligent-tiering
+      #     Status: Enabled
+      #     Tierings: 
+      #       - AccessTier: ARCHIVE_ACCESS
+      #         Days: 90
+            
+      LifecycleConfiguration:
+        Rules:
+          - Id: techno-rule-orders
+            Prefix: glacier
+            Status: Enabled
+            ExpirationInDays: 365
+            Transitions:
+              - TransitionInDays: 30
+                StorageClass: INTELLIGENT_TIERING
+              - TransitionInDays: 120
+                StorageClass: GLACIER
+  
+  LogsBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      AccessControl: Private
+      BucketName: techno-logs-raihan-2026
+      # IntelligentTieringConfigurations:
+      #   - Id: techno-intelligent-tiering-logs
+      #     Status: Enabled
+      #     Tierings: 
+      #       - AccessTier: ARCHIVE_ACCESS
+      #         Days: 90
+            
+      LifecycleConfiguration:
+        Rules:
+          - Id: techno-rule-logs
+            Status: Enabled
+            ExpirationInDays: 120
+            Transitions:
+              - TransitionInDays: 14
+                StorageClass: INTELLIGENT_TIERING
+                
+Outputs:
+  OrdersBucketName:
+    Value: !Ref OrdersBucket
+    Description: Name of the sample Amazon S3 bucket with a lifecycle configuration.
+
+  LogsBucketName:
+    Value: !Ref LogsBucket
+    Description: Name of the sample Amazon S3 bucket with a lifecycle configuration.

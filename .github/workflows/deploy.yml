@@ -314,82 +314,82 @@ jobs:
           zip -q /tmp/frontend.zip index.html
           ls -lh /tmp/frontend.zip
 
-      - name: Deploy to Amplify (create-deployment + start-deployment)
-        id: amplify
-        run: |
-          APP_ID="${{ secrets.AMPLIFY_APP_ID }}"
-          BRANCH="main"
+      # - name: Deploy to Amplify (create-deployment + start-deployment)
+      #   id: amplify
+      #   run: |
+      #     APP_ID="${{ secrets.AMPLIFY_APP_ID }}"
+      #     BRANCH="main"
 
-          # Pastikan branch ada
-          aws amplify create-branch \
-            --app-id "$APP_ID" \
-            --branch-name "$BRANCH" \
-            --region ${{ env.AWS_REGION }} \
-            --no-cli-pager 2>/dev/null || true
+      #     # Pastikan branch ada
+      #     aws amplify create-branch \
+      #       --app-id "$APP_ID" \
+      #       --branch-name "$BRANCH" \
+      #       --region ${{ env.AWS_REGION }} \
+      #       --no-cli-pager 2>/dev/null || true
 
-          # Stop semua job yang masih running/pending sebelum buat deployment baru
-          echo "Checking for running jobs..."
-          RUNNING_JOBS=$(aws amplify list-jobs \
-            --app-id "$APP_ID" \
-            --branch-name "$BRANCH" \
-            --region ${{ env.AWS_REGION }} \
-            --max-results 10 \
-            --query 'jobSummaries[?status==`RUNNING` || status==`PENDING`].jobId' \
-            --output text --no-cli-pager 2>/dev/null || echo "")
-          for JID in $RUNNING_JOBS; do
-            echo "  Stopping job: $JID"
-            aws amplify stop-job \
-              --app-id "$APP_ID" \
-              --branch-name "$BRANCH" \
-              --job-id "$JID" \
-              --region ${{ env.AWS_REGION }} \
-              --no-cli-pager 2>/dev/null || true
-          done
-          # Tunggu sampai benar-benar tidak ada job yang running
-          for i in $(seq 1 20); do
-            STILL_RUNNING=$(aws amplify list-jobs \
-              --app-id "$APP_ID" \
-              --branch-name "$BRANCH" \
-              --region ${{ env.AWS_REGION }} \
-              --max-results 5 \
-              --query 'jobSummaries[?status==`RUNNING` || status==`PENDING`].jobId' \
-              --output text --no-cli-pager 2>/dev/null || echo "")
-            if [ -z "$STILL_RUNNING" ] || [ "$STILL_RUNNING" = "None" ]; then
-              echo "  No running jobs, proceeding..."
-              break
-            fi
-            echo "  [$i/20] Still running: $STILL_RUNNING — waiting 5s..."
-            sleep 5
-          done
+      #     # Stop semua job yang masih running/pending sebelum buat deployment baru
+      #     echo "Checking for running jobs..."
+      #     RUNNING_JOBS=$(aws amplify list-jobs \
+      #       --app-id "$APP_ID" \
+      #       --branch-name "$BRANCH" \
+      #       --region ${{ env.AWS_REGION }} \
+      #       --max-results 10 \
+      #       --query 'jobSummaries[?status==`RUNNING` || status==`PENDING`].jobId' \
+      #       --output text --no-cli-pager 2>/dev/null || echo "")
+      #     for JID in $RUNNING_JOBS; do
+      #       echo "  Stopping job: $JID"
+      #       aws amplify stop-job \
+      #         --app-id "$APP_ID" \
+      #         --branch-name "$BRANCH" \
+      #         --job-id "$JID" \
+      #         --region ${{ env.AWS_REGION }} \
+      #         --no-cli-pager 2>/dev/null || true
+      #     done
+      #     # Tunggu sampai benar-benar tidak ada job yang running
+      #     for i in $(seq 1 20); do
+      #       STILL_RUNNING=$(aws amplify list-jobs \
+      #         --app-id "$APP_ID" \
+      #         --branch-name "$BRANCH" \
+      #         --region ${{ env.AWS_REGION }} \
+      #         --max-results 5 \
+      #         --query 'jobSummaries[?status==`RUNNING` || status==`PENDING`].jobId' \
+      #         --output text --no-cli-pager 2>/dev/null || echo "")
+      #       if [ -z "$STILL_RUNNING" ] || [ "$STILL_RUNNING" = "None" ]; then
+      #         echo "  No running jobs, proceeding..."
+      #         break
+      #       fi
+      #       echo "  [$i/20] Still running: $STILL_RUNNING — waiting 5s..."
+      #       sleep 5
+      #     done
 
-          # create-deployment → dapat zipUploadUrl + jobId
-          DEPLOY_RESP=$(aws amplify create-deployment \
-            --app-id "$APP_ID" \
-            --branch-name "$BRANCH" \
-            --region ${{ env.AWS_REGION }} \
-            --output json)
+      #     # create-deployment → dapat zipUploadUrl + jobId
+      #     DEPLOY_RESP=$(aws amplify create-deployment \
+      #       --app-id "$APP_ID" \
+      #       --branch-name "$BRANCH" \
+      #       --region ${{ env.AWS_REGION }} \
+      #       --output json)
 
-          UPLOAD_URL=$(echo "$DEPLOY_RESP" | python3 -c "import json,sys; print(json.load(sys.stdin)['zipUploadUrl'])")
-          JOB_ID=$(echo      "$DEPLOY_RESP" | python3 -c "import json,sys; print(json.load(sys.stdin)['jobId'])")
-          echo "JOB_ID=$JOB_ID" >> $GITHUB_OUTPUT
-          echo "Got jobId=$JOB_ID, uploading zip..."
+      #     UPLOAD_URL=$(echo "$DEPLOY_RESP" | python3 -c "import json,sys; print(json.load(sys.stdin)['zipUploadUrl'])")
+      #     JOB_ID=$(echo      "$DEPLOY_RESP" | python3 -c "import json,sys; print(json.load(sys.stdin)['jobId'])")
+      #     echo "JOB_ID=$JOB_ID" >> $GITHUB_OUTPUT
+      #     echo "Got jobId=$JOB_ID, uploading zip..."
 
-          # Upload zip via PUT ke pre-signed URL
-          HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
-            -X PUT "$UPLOAD_URL" \
-            -H "Content-Type: application/zip" \
-            --data-binary @/tmp/frontend.zip)
-          echo "Upload HTTP status: $HTTP_CODE"
-          [ "$HTTP_CODE" = "200" ] || (echo "Upload failed: $HTTP_CODE" && exit 1)
+      #     # Upload zip via PUT ke pre-signed URL
+      #     HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" \
+      #       -X PUT "$UPLOAD_URL" \
+      #       -H "Content-Type: application/zip" \
+      #       --data-binary @/tmp/frontend.zip)
+      #     echo "Upload HTTP status: $HTTP_CODE"
+      #     [ "$HTTP_CODE" = "200" ] || (echo "Upload failed: $HTTP_CODE" && exit 1)
 
-          # start-deployment dengan jobId dari create-deployment
-          aws amplify start-deployment \
-            --app-id "$APP_ID" \
-            --branch-name "$BRANCH" \
-            --job-id "$JOB_ID" \
-            --region ${{ env.AWS_REGION }} \
-            --no-cli-pager
-          echo "Deployment started: job $JOB_ID"
+      #     # start-deployment dengan jobId dari create-deployment
+      #     aws amplify start-deployment \
+      #       --app-id "$APP_ID" \
+      #       --branch-name "$BRANCH" \
+      #       --job-id "$JOB_ID" \
+      #       --region ${{ env.AWS_REGION }} \
+      #       --no-cli-pager
+      #     echo "Deployment started: job $JOB_ID"
 
       - name: Wait for Amplify deployment
         run: |

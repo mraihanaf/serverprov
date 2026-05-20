@@ -1,0 +1,40 @@
+Resources:
+  MyDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: postgres
+      EngineVersion: "15"
+      DBName: ordersdb
+      MasterUsername: dbadmin
+      MasterUserPassword: TechnoCloud2026!
+      StorageEncrypted: true
+      DeletionProtection: true
+      BackupRetentionPeriod: 7
+      AllocatedStorage: 20
+      DBInstanceClass: db.t3.micro
+      StorageType: gp3
+      DBSubnetGroupName: !Ref myDBSubnetGroup
+      DBSecurityGroups: 
+        - !Ref DBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: techno-rds
+
+  DBSecurityGroup: 
+    Type: AWS::RDS::DBSecurityGroup
+    Properties: 
+      EC2VpcId: vpc-00ca1b1e6477a6953
+      GroupDescription: Techno RDS Security Group
+      DBSecurityGroupIngress: 
+        - EC2SecurityGroupId: "sg-0757666e2ffe5334f"
+    
+  myDBSubnetGroup: 
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: Techno DS Subnet Group
+      SubnetIds: 
+        - subnet-0a2ba53ad21fc61e1
+        - subnet-010210e102f6de793
+      Tags: 
+        - Key: Name
+          Value: techno-subnet-group

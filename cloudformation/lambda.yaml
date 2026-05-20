@@ -1,0 +1,212 @@
+Resources:
+  InitDatabase:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.11
+      FunctionName: techno-lambda-init-db
+      Role: arn:aws:iam::582450002492:role/LabRole
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+            return {}
+      Description: Initialize database
+      TracingConfig:
+        Mode: Active
+      Environment:
+        Variables:
+          SECRET_ARN: arn:aws:secretsmanager:us-east-1:582450002492:secret:techno-secret-rds-credentials-AMDrYs
+      Timeout: 300
+      MemorySize: 512
+      Tags:
+        - Key: Name
+          Value: techno-lambda-init-db
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-07358962d18c8bf54
+        SubnetIds:
+          - subnet-0a2ba53ad21fc61e1
+          - subnet-010210e102f6de793
+
+  InitDatabaseVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref InitDatabase
+        Description: v1
+
+  InitDatabaseAlias:
+      Type: AWS::Lambda::Alias
+      Properties:
+        FunctionName: !Ref InitDatabase
+        FunctionVersion: !GetAtt InitDatabaseVersion.Version
+        Name: live
+
+  GenerateReport:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.11
+      Role: arn:aws:iam::582450002492:role/LabRole
+      Handler: index.handler
+      Environment:
+        Variables:
+          SECRET_ARN: changeme
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+            return {}
+      Description: Generate Report
+      TracingConfig:
+        Mode: Active
+      Timeout: 120
+      MemorySize: 1024
+      FunctionName: techno-lambda-generate-report
+      Tags:
+        - Key: Name
+          Value: techno-lambda-generate-report
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-07358962d18c8bf54
+        SubnetIds:
+          - subnet-0a2ba53ad21fc61e1
+          - subnet-010210e102f6de793
+
+  GenerateReportVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref GenerateReport
+        Description: v1
+
+  GenerateReportAlias:
+      Type: AWS::Lambda::Alias
+      Properties:
+        FunctionName: !Ref GenerateReport
+        FunctionVersion: !GetAtt GenerateReportVersion.Version
+        Name: live
+  
+  SendNotication:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.11
+      Role: arn:aws:iam::582450002492:role/LabRole
+      Handler: index.handler
+      Environment:
+        Variables:
+          SECRET_ARN: changeme
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+            return {}
+      Description: Send Notification
+      TracingConfig:
+        Mode: Active
+      Timeout: 60
+      MemorySize: 256
+      FunctionName: techno-lambda-send-notification
+      Tags:
+        - Key: Name
+          Value: techno-lambda-send-notification
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-07358962d18c8bf54
+        SubnetIds:
+          - subnet-0a2ba53ad21fc61e1
+          - subnet-010210e102f6de793
+
+  SendNoticationVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref SendNotication
+        Description: v1
+
+  SendNoticationAlias:
+      Type: AWS::Lambda::Alias
+      Properties:
+        FunctionName: !Ref SendNotication
+        FunctionVersion: !GetAtt SendNoticationVersion.Version
+        Name: live
+  
+  UpdateInventory:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.11
+      Role: arn:aws:iam::582450002492:role/LabRole
+      Handler: index.handler
+      Environment:
+        Variables:
+          SECRET_ARN: changeme
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+            return {}
+      Description: UpdateInventory
+      TracingConfig:
+        Mode: Active
+      Timeout: 45
+      MemorySize: 256
+      FunctionName: techno-lambda-update-inventory
+      Tags:
+        - Key: Name
+          Value: techno-lambda-update-inventory
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-07358962d18c8bf54
+        SubnetIds:
+          - subnet-0a2ba53ad21fc61e1
+          - subnet-010210e102f6de793
+
+  UpdateInventoryVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref UpdateInventory
+        Description: v1
+      
+
+  UpdateInventoryAlias:
+      Type: AWS::Lambda::Alias
+      Properties:
+        FunctionName: !Ref UpdateInventory
+        FunctionVersion: !GetAtt UpdateInventoryVersion.Version
+        Name: live
+
+  ProcessPayment:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.11
+      Role: arn:aws:iam::582450002492:role/LabRole
+      Handler: index.handler
+      Environment:
+        Variables:
+          SECRET_ARN: changeme
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+            return {}
+      Description: Process Payment
+      TracingConfig:
+        Mode: Active
+      Timeout: 30
+      MemorySize: 512
+      FunctionName: techno-lambda-process-payment
+      Tags:
+        - Key: Name
+          Value: techno-lambda-process-payment
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-07358962d18c8bf54
+        SubnetIds:
+          - subnet-0a2ba53ad21fc61e1
+          - subnet-010210e102f6de793
+
+  ProcessPaymentVersion:
+      Type: AWS::Lambda::Version
+      Properties:
+        FunctionName: !Ref ProcessPayment
+        Description: v1
+
+  ProcessPaymentAlias:
+      Type: AWS::Lambda::Alias
+      Properties:
+        FunctionName: !Ref ProcessPayment
+        FunctionVersion: !GetAtt ProcessPaymentVersion.Version
+        Name: live
+  
